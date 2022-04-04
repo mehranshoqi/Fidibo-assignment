@@ -19,7 +19,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
-  double? up, down, left, right;
+  double up = 50.h - _squareSize / 2, left = 50.w - _squareSize / 2;
   static const double _squareSize = 200;
   late final AnimationController _lController;
   late GetImageCubit getImageCubit;
@@ -46,9 +46,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           _handleImageDirection();
           return Positioned(
             top: up,
-            bottom: down,
             left: left,
-            right: right,
             child: Container(
               alignment: Alignment.center,
               decoration: BoxDecoration(color: Colors.grey.shade100),
@@ -130,9 +128,23 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     swipeDetails.reset();
     _lController
       ..stop()
-      ..forward(from: 1 - _lController.value);
-    _lController.repeat();
+      ..forward(from: _getStartAnimation());
     setState(() => null);
+  }
+
+  double _getStartAnimation() {
+    switch (swipeDetails.activeDirection) {
+      case SwipeDirection.right:
+        return left / 100.w;
+      case SwipeDirection.left:
+        return 1 - left / 100.w;
+      case SwipeDirection.up:
+        return 1 - up / 100.h;
+      case SwipeDirection.down:
+        return up / 100.h;
+      default:
+        return 0;
+    }
   }
 
   void _handleImageDirection() {
