@@ -22,7 +22,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   double? up, down, left, right;
   static const double _squareSize = 200;
   late final AnimationController _lController;
-  late Animation<double> animation;
   late GetImageCubit getImageCubit;
   final SwipeDetails swipeDetails =
       SwipeDetails(up: 0, down: 0, right: 0, left: 0);
@@ -96,7 +95,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       duration: const Duration(seconds: 7),
       lowerBound: 0,
       upperBound: 1,
-    );
+    )..addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          _lController
+            ..reset()
+            ..forward();
+        }
+      });
     getImageCubit = sl<GetImageCubit>();
   }
 
@@ -123,6 +128,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   void setDirection() {
     swipeDetails.setDirection();
     swipeDetails.reset();
+    _lController
+      ..stop()
+      ..forward(from: 1 - _lController.value);
     _lController.repeat();
     setState(() => null);
   }
@@ -130,19 +138,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   void _handleImageDirection() {
     switch (swipeDetails.activeDirection) {
       case SwipeDirection.right:
-        right = null;
         left = (100.w * _lController.value);
         break;
       case SwipeDirection.left:
-        left = null;
-        right = (100.w * _lController.value);
+        left = 100.w - (100.w * _lController.value);
         break;
       case SwipeDirection.up:
-        up = null;
-        down = 100.h * _lController.value;
+        up = 100.h - 100.h * _lController.value;
         break;
       case SwipeDirection.down:
-        down = null;
         up = (100.h * _lController.value);
         break;
       default:
